@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package com.glassbeam;
+
+message Ingredient {
+  uint64 sugar = 1;
+  double fat = 2;
+}
+
+message Pizza {
+  string name = 1;
+  map<string, Ingredient> ingredients = 2;
+  bool vegetarian = 3;
+}
