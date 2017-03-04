@@ -1,11 +1,10 @@
-package com.glassbeam
+package com.glassbeam.bharath.experiments
 
 import java.io.ByteArrayOutputStream
-import java.io.File
-import com.sksamuel.avro4s.AvroOutputStream
-import com.sksamuel.avro4s.AvroInputStream
 
-object Message extends App {
+import com.sksamuel.avro4s.AvroOutputStream
+
+object MessageSizeTest extends App {
 
   case class Ingredient(sugar: Long, fat: Double)
   case class Pizza(name: String, ingredients: Map[String, Ingredient], vegetarian: Boolean)
