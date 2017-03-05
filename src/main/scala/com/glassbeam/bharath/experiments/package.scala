@@ -1,84 +1,70 @@
 package com.glassbeam.bharath
 
-import java.io.ByteArrayOutputStream
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.sksamuel.avro4s.{AvroBinaryOutputStream, AvroOutputStream}
+import com.sksamuel.avro4s.{AvroBinaryOutputStream, AvroInputStream, AvroOutputStream, FromRecord, SchemaFor, ToRecord}
 
 /**
   * Created by bharadwaj on 04/03/17.
   */
 package object experiments {
 
-  trait VersionedEvent extends Seq[Byte] {
-    private var position = 0
-
-    protected def bytes: Array[Byte]
-
-    override def length: Int = bytes.length
-
-    override def iterator: Iterator[Byte] = new Iterator[Byte] {
-      override def hasNext: Boolean = position == length
-      override def next(): Byte = { val byte = bytes(position); position += 1; byte }
+  trait AvroFromBinary {
+    def fromBinary[T: SchemaFor : FromRecord](bytes: Array[Byte]): T = {
+      val in = new ByteArrayInputStream(bytes)
+      val input = AvroInputStream.binary[T](in)
+      input.iterator.toSeq.head
     }
-
-    override def apply(idx: Int): Byte = bytes(idx)
   }
 
-  object VersionedEvent {
-    implicit def versionedEventBytes(v: VersionedEvent): Array[Byte] = v.bytes
-
-    def bytes[T](baos: ByteArrayOutputStream, abs: AvroBinaryOutputStream[T], t: T): Array[Byte] = {
-      abs.write(t)
-      abs.close()
-      baos.toByteArray
-    }
-
-    def scalarEventBytes(e: ScalarEvent): Array[Byte] = {
+  trait AvroToBinary {
+    def toBinary[T: SchemaFor : ToRecord](event: T): Array[Byte] = {
       val baos = new ByteArrayOutputStream()
-      val binary = AvroOutputStream.binary[ScalarEvent](baos)
-      VersionedEvent.bytes[ScalarEvent](baos, binary, e)
+      val output = AvroOutputStream.binary[T](baos)
+      output.write(event)
+      output.close()
+      baos.toByteArray
     }
   }
 
   // use the event_type and event_version to decode the event byte array
-  case class ScalarEvent(emps: String, event_type: Short, event_version: Short, event: Array[Byte])
-
-  case class VersionedEventOne(sysid1: String, sysid2: String, sysid3: String) extends VersionedEvent {
-    override def bytes: Array[Byte] = {
-      val baos = new ByteArrayOutputStream()
-      val binary: AvroBinaryOutputStream[VersionedEventOne] = AvroOutputStream.binary[VersionedEventOne](baos)
-      VersionedEvent.bytes[VersionedEventOne](baos, binary, this)
-    }
+  case class ScalarEvent(emps: String, event_type: Int, event_version: Int, event: Array[Byte]) extends AvroToBinary {
+    def toBinary(event: ScalarEvent): Array[Byte] = toBinary[ScalarEvent](event)
+  }
+  object ScalarEvent extends AvroFromBinary {
+    def fromBinary(bytes: Array[Byte]): ScalarEvent = fromBinary[ScalarEvent](bytes)
   }
 
-  case class VersionedEventTwo(obsts: Long, filename: String, bundleid: String, seenid: Long) extends VersionedEvent {
-    override def bytes: Array[Byte] = {
-      val baos = new ByteArrayOutputStream()
-      val binary: AvroBinaryOutputStream[VersionedEventTwo] = AvroOutputStream.binary[VersionedEventTwo](baos)
-      VersionedEvent.bytes[VersionedEventTwo](baos, binary, this)
-    }
+  case class VersionedEventOne(sysid1: String, sysid2: String, sysid3: String) extends AvroToBinary {
+    def toBinary(event: VersionedEventOne): Array[Byte] = toBinary[VersionedEventOne](event)
+  }
+  object VersionedEventOne extends AvroFromBinary {
+    def fromBinary(bytes: Array[Byte]): VersionedEventOne = fromBinary[VersionedEventOne](bytes)
   }
 
-  case class VersionedEventThree(kv: Map[String, String]) extends VersionedEvent {
-    override def bytes: Array[Byte] = {
-      val baos = new ByteArrayOutputStream()
-      val binary: AvroBinaryOutputStream[VersionedEventThree] = AvroOutputStream.binary[VersionedEventThree](baos)
-      VersionedEvent.bytes[VersionedEventThree](baos, binary, this)
-    }
+  case class VersionedEventTwo(obsts: Long, filename: String, bundleid: String, seenid: Long) extends AvroToBinary {
+    def toBinary(event: VersionedEventTwo): Array[Byte] = toBinary[VersionedEventTwo](event)
+  }
+  object VersionedEventTwo extends AvroFromBinary {
+    def fromBinary(bytes: Array[Byte]): VersionedEventTwo = fromBinary[VersionedEventTwo](bytes)
+  }
+
+  case class VersionedEventThree(kv: Map[String, String]) extends AvroToBinary {
+    def toBinary(event: VersionedEventThree): Array[Byte] = toBinary[VersionedEventThree](event)
+  }
+  object VersionedEventThree extends AvroFromBinary {
+    def fromBinary(bytes: Array[Byte]): VersionedEventThree = fromBinary[VersionedEventThree](bytes)
   }
 
   val ve1 = VersionedEventOne("sysid1", "sysid2", "sysid3")
-  val e1 = ScalarEvent("e/m/p/s", 1, 1, ve1)
-  val e1Bytes = VersionedEvent.scalarEventBytes(e1)
+  val e1 = ScalarEvent("e/m/p/s", 1, 1, ve1.toBinary())
 
   val ve2 = VersionedEventTwo(0L, "filename", "bundleid", 0L)
-  val e2 = ScalarEvent("e/m/p/s", 2, 1, ve2)
-  val e2Bytes = VersionedEvent.scalarEventBytes(e2)
+  val e2 = ScalarEvent("e/m/p/s", 2, 1, ve2.toBinary())
 
   val ve3 = VersionedEventThree(Map("key" -> "value"))
-  val e3 = ScalarEvent("e/m/p/s", 3, 1, ve3)
-  val e3Bytes = VersionedEvent.scalarEventBytes(e3)
+  val e3 = ScalarEvent("e/m/p/s", 3, 1, ve3.toBinary())
 
-  val testTopic = "testTopic"
-  val testPartition = "testPartition"
+  val testTopic = "test"
+  val testPartition = "test"
 }

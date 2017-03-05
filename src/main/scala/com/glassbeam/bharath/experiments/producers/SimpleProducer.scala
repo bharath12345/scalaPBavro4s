@@ -18,9 +18,9 @@ object SimpleProducer extends App {
   private val producer = new KafkaProducer[String, Array[Byte]](props)
 
   try {
-    producer.send(new ProducerRecord(testTopic, testPartition, e1Bytes))
-    producer.send(new ProducerRecord(testTopic, testPartition, e2Bytes))
-    producer.send(new ProducerRecord(testTopic, testPartition, e3Bytes))
+    producer.send(new ProducerRecord(testTopic, testPartition, e1.toBinary()))
+    producer.send(new ProducerRecord(testTopic, testPartition, e2.toBinary()))
+    producer.send(new ProducerRecord(testTopic, testPartition, e3.toBinary()))
     println(s"Finished sending all records")
   } catch {
     case e: Exception =>

@@ -1,0 +1,23 @@
+{
+  "type": "record",
+  "name": "ScalarEvent",
+  "namespace": "$iw",
+  "fields": [
+    {
+      "name": "emps",
+      "type": "string"
+    },
+    {
+      "name": "event_type",
+      "type": "int"
+    },
+    {
+      "name": "event_version",
+      "type": "int"
+    },
+    {
+      "name": "event",
+      "type": "bytes"
+    }
+  ]
+}
