@@ -42,7 +42,7 @@ class CakeConsumerActor(config: Config) extends Actor with ActorLogging {
 
   override def preStart() = {
     super.preStart()
-    kafkaConsumerActor ! Subscribe
+    kafkaConsumerActor ! Subscribe.AutoPartition(List("caketest1"))
   }
 
   override def postStop() = {
@@ -70,7 +70,7 @@ class CakeConsumerActor(config: Config) extends Actor with ActorLogging {
 }
 
 object CakeConsumer extends App {
-  val config = ConfigFactory.load().getConfig("producer")
+  val config = ConfigFactory.load().getConfig("consumer")
   val system = ActorSystem("CakeConsumer")
-  val helloActor = system.actorOf(CakeConsumerActor.props(config), name = "CakeConsumer")
+  val consumerActor = system.actorOf(CakeConsumerActor.props(config), name = "CakeConsumer")
 }
