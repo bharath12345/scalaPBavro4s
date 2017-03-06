@@ -16,6 +16,7 @@ lazy val root = (project in file(".")).
       version := "0.1.0-SNAPSHOT"
     )),
     name := "scalaPBavro4s",
+    compileOrder := CompileOrder.JavaThenScala,
     resolvers += Resolver.bintrayRepo("cakesolutions", "maven"),
     libraryDependencies ++= Seq(
       "com.sksamuel.avro4s" %% "avro4s-core" % "1.6.4",

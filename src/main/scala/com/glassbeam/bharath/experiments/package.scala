@@ -2,7 +2,7 @@ package com.glassbeam.bharath
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.sksamuel.avro4s.{AvroBinaryOutputStream, AvroInputStream, AvroOutputStream, FromRecord, SchemaFor, ToRecord}
+import com.sksamuel.avro4s.{AvroInputStream, AvroOutputStream, FromRecord, SchemaFor, ToRecord}
 
 /**
   * Created by bharadwaj on 04/03/17.
